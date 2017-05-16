@@ -20,7 +20,8 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       HTML("Provide input for Reporting Country, Partner Countries, 
-           Commodities, Trade Direction, and y-axis metric"),
+           Commodities, Trade Direction, and y-axis metric."),
+      HTML("Click the 'Plot' button to update the plot."), 
       br(), 
       br(), 
       selectInput("reporter", 
@@ -51,12 +52,13 @@ shinyUI(fluidPage(
       br(), 
       br(), 
       tags$ul(
-        tags$li(HTML("Created using packages <a href='https://github.com/ChrisMuir/comtradr'>comtradr</a> 
-                     and <a href='https://github.com/tidyverse/ggplot2'>ggplot2</a>.")), 
+        tags$li(HTML("Source code for this app can be found 
+                     <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp'>here</a>. 
+                     Please report bugs 
+                     <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp/issues'>here</a>")), 
         tags$li(HTML("Source for all shipping data is <a href='https://comtrade.un.org/data/'>UN Comtrade</a> 
                      (<a href='https://comtrade.un.org/data/doc/api/'>link</a> 
                      to the full documentation of the UN Comtrade API).")), 
-        tags$li(HTML("Please report bugs <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp/issues'>here</a>")), 
         tags$li("This app is not affiliated with the United Nations in any way.")
       )
     ),

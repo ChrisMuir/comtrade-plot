@@ -1,7 +1,7 @@
 Visualize UN Comtrade Data
 --------------------------
 
-Shiny app for plotting inter-country shipping data from the United Nations Comtrade DB. 
+Shiny app for plotting inter-country shipping data from the United Nations Comtrade DB. View the app [here](https://chrismuir.shinyapps.io/comtrade_plot_shinyapp/).
 
 Built using [comtradr](https://github.com/ChrisMuir/comtradr), [ggplot2](https://github.com/tidyverse/ggplot2), and [shiny](https://github.com/rstudio/shiny).
 
