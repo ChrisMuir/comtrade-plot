@@ -56,6 +56,7 @@ shinyUI(fluidPage(
         tags$li(HTML("Source for all shipping data is <a href='https://comtrade.un.org/data/'>UN Comtrade</a> 
                      (<a href='https://comtrade.un.org/data/doc/api/'>link</a> 
                      to the full documentation of the UN Comtrade API).")), 
+        tags$li(HTML("Please report bugs <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp/issues'>here</a>"))
         tags$li("This app is not affiliated with the United Nations in any way.")
       )
     ),
