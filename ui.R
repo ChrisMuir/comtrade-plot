@@ -1,6 +1,5 @@
 library(shiny)
-
-## TODO: Add link for bug reports (after I post source code on GitHub.)
+library(plotly)
 
 # Create vectors of country names and commodities from the data frames downloaded 
 # from the UN Comtrade website (data frames are created in the global.R file).
@@ -66,8 +65,7 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      #p(class="text-small", "Plot inter-country shipping data"), 
-      plotOutput("resPlot", height = "800px")
+      plotlyOutput("resPlot", height = "768px")
     )
   )
 ))

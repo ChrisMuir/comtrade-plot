@@ -2,6 +2,7 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(comtradr)
+library(plotly)
 
 no_data_func <- function(res, val_vs_kg = FALSE) {
   if (val_vs_kg) {
@@ -20,9 +21,10 @@ no_data_func <- function(res, val_vs_kg = FALSE) {
                        "Here are the return details provided by the API:\n", 
                        paste(res$msg, res$details, sep = "\n"))
   }
-  par(mar = c(0,0,0,0))
-  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-  text(x = 0.5, y = 0.5, msg_text, cex = 1.6, col = "black")
+
+  p <- ggplot(data.frame()) + geom_point() + xlim(0, 10) + ylim(0, 100) + 
+    annotate(geom = "text", x = 5, y = 50, label = msg_text, color = "red")
+  return(p)
 }
 
 get_plot_title <- function(reporters, partners, trade_dir) {
@@ -69,7 +71,8 @@ ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
         summarise(value = as.numeric(sum(`Netweight (kg)`, na.rm = TRUE)))
       y_label <- "total weight of shipments in KG"
     } else {
-      return(no_data_func(res, val_vs_kg = TRUE))
+      p <- no_data_func(res, val_vs_kg = TRUE)
+      return(ggplotly(p))
     }
   } else if (val_vs_kg == "value") {
     plotdf <- df %>% 
@@ -79,19 +82,19 @@ ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
   }
 
   p <- ggplot(plotdf, aes(Year, value, color = factor(Partner))) + 
-    geom_point(size = 4) + 
-    geom_line(size = 1.5) + 
+    geom_point(size = 2.5) + 
+    geom_line(size = 1) + 
     scale_x_continuous(limits = c(min(plotdf$Year), max(plotdf$Year)), 
                        breaks = seq.int(min(plotdf$Year), max(plotdf$Year), 2)) + 
     labs(title = plot_title, x = "year", y = y_label, 
          color = "Partner\nCountries", linetype = "Partner\nCountries") +
     theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust = 1), 
-          axis.title = element_text(size = 14), 
-          axis.text = element_text(size = 14), 
-          legend.text = element_text(size = 14), 
-          legend.title = element_text(size = 14), 
-          title = element_text(size = 16))
-  return(p)
+          axis.title = element_text(size = 10), 
+          axis.text = element_text(size = 8), 
+          legend.text = element_text(size = 8), 
+          legend.title = element_text(size = 8), 
+          title = element_text(size = 12))
+  return(ggplotly(p))
 }
 
 commodity_code_lookup <- function(commod_desc, commoditydf) {
@@ -125,14 +128,13 @@ shinyServer(function(input, output) {
     )
   }, ignoreNULL = FALSE)
   
-  output$resPlot <- renderPlot({
+  output$resPlot <- renderPlotly({
     res <- ship_data()
     input_vals <- user_input()
 
     if (!is.null(res$data) && nrow(res$data) > 0) {
       p <- ggplot_func(res, input$value_vs_kg, input_vals$reporters, 
                        input_vals$partners, input_vals$trade_dir)
-      print(p)
     } else {
       no_data_func(res)
     }
