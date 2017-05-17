@@ -13,9 +13,10 @@ shinyUI(fluidPage(
   # Application title
   tags$div(
     tags$h1("UN Comtrade Data Viz"), 
-    tags$h2("Tool for plotting inter-country shipping data from the United Nations Comtrade DB")
+    tags$h3("Tool for plotting inter-country shipping data from the United Nations Comtrade DB")
   ), 
-  
+  br(), 
+
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
@@ -41,8 +42,8 @@ shinyUI(fluidPage(
                   multiple = TRUE), 
       checkboxGroupInput("trade_direction", 
                    label = "Trade Direction for Reporting Country:", 
-                   choices = c("Imports" = "imports", "Exports" = "exports", "Re-Imports" = "re-imports", "Re-Exports" = "re-exports", "All" = "all"), 
-                   selected = "exports"), 
+                   choices = c("Imports" = "Imports", "Exports" = "Exports", "Re-Imports" = "Re-Imports", "Re-Exports" = "Re-Exports", "All" = "All"), 
+                   selected = "Exports"), 
       radioButtons("value_vs_kg", 
                          label = paste("Plot 'value of shipments' or 'weight of shipments' along y-axis", 
                                        "(Many Comtrade datasets do NOT include data on shipment weight):", sep = "\n"), 
@@ -55,7 +56,7 @@ shinyUI(fluidPage(
         tags$li(HTML("Source code for this app can be found 
                      <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp'>here</a>. 
                      Please report bugs 
-                     <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp/issues'>here</a>")), 
+                     <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp/issues'>here</a>.")), 
         tags$li(HTML("Source for all shipping data is <a href='https://comtrade.un.org/data/'>UN Comtrade</a> 
                      (<a href='https://comtrade.un.org/data/doc/api/'>link</a> 
                      to the full documentation of the UN Comtrade API).")), 
