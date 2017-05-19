@@ -9,14 +9,14 @@ commodities <- commoditydf$commodity
 
 shinyUI(fluidPage(
   
-  # Application title
+  # Application title.
   tags$div(
     tags$h1("UN Comtrade Data Viz"), 
     tags$h3("Tool for plotting inter-country shipping data from the United Nations Comtrade DB")
   ), 
   br(), 
 
-  # Sidebar with a slider input for number of bins
+  # Sidebar with a a number of fields for user input.
   sidebarLayout(
     sidebarPanel(
       HTML("Provide input for Reporting Country, Partner Countries, 
@@ -63,7 +63,7 @@ shinyUI(fluidPage(
       )
     ),
     
-    # Show a plot of the generated distribution
+    # Show plot of data returned from the API call.
     mainPanel(
       plotlyOutput("resPlot", height = "768px")
     )
