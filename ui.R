@@ -1,6 +1,3 @@
-library(shiny)
-library(plotly)
-
 # Create vectors of country names and commodities from the data frames downloaded 
 # from the UN Comtrade website (data frames are created in the global.R file).
 reporters <- countrydf[countrydf$type == "reporter", ]$`country name`
@@ -15,7 +12,7 @@ shinyUI(fluidPage(
     tags$h3("Tool for plotting inter-country shipping data from the United Nations Comtrade DB")
   ), 
   br(), 
-
+  
   # Sidebar with a a number of fields for user input.
   sidebarLayout(
     sidebarPanel(
@@ -24,33 +21,41 @@ shinyUI(fluidPage(
       HTML("Click the 'Plot' button to update the plot."), 
       br(), 
       br(), 
+      
       selectInput("reporter", 
                   label = "Reporting Country:",
                   selected = "China", 
                   choices = reporters,
                   multiple = TRUE),
+      
       selectInput("partner", 
                   label = "Partner Countries:", 
                   selected = c("USA", "Mexico", "Rep. of Korea"), 
                   choices = partners, 
                   multiple = TRUE), 
+      
       selectInput("commod", 
                   label = "HS Code / Commodities:", 
                   selected = "TOTAL - Total of all HS commodities", 
                   choices = commodities, 
                   multiple = TRUE), 
+      
       checkboxGroupInput("trade_direction", 
-                   label = "Trade Direction for Reporting Country:", 
-                   choices = c("Imports" = "Imports", "Exports" = "Exports", "Re-Imports" = "Re-Imports", "Re-Exports" = "Re-Exports", "All" = "All"), 
-                   selected = "Exports"), 
+                         label = "Trade Direction for Reporting Country:", 
+                         choices = c("Imports" = "Imports", "Exports" = "Exports", "Re-Imports" = "Re-Imports", "Re-Exports" = "Re-Exports", "All" = "All"), 
+                         selected = "Exports"), 
+      
       radioButtons("value_vs_kg", 
-                         label = paste("Plot 'value of shipments' or 'weight of shipments' along y-axis", 
-                                       "(Many Comtrade datasets do NOT include data on shipment weight):", sep = "\n"), 
-                         choices = c("Value in USD" = "value", "Weight in KG" = "weight"), 
-                         selected = "value"), 
+                   label = paste("Plot 'value of shipments' or 'weight of shipments' along y-axis", 
+                                 "(Many Comtrade datasets do NOT include data on shipment weight):", sep = "\n"), 
+                   choices = c("Value in USD" = "value", "Weight in KG" = "weight"), 
+                   selected = "value"), 
+      
+      # Plot will not update until user clicks the "Plot" button.
       actionButton("get_plot", "Plot"), 
       br(), 
       br(), 
+      
       tags$ul(
         tags$li(HTML("Source code for this app can be found 
                      <a href='https://github.com/ChrisMuir/comtrade_plot_shinyapp'>here</a>. 
