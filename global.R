@@ -1,6 +1,7 @@
 library(shiny)
 library(plotly)
 library(comtradr)
+library(dplyr)
 
 # Download the countries table and commodities table. Server.R will use both of 
 # these data frames, ui.R will use a number of vectors taken from these data frames.

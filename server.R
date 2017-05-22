@@ -1,4 +1,3 @@
-library(dplyr)
 library(ggplot2)
 
 no_data_func <- function(res, val_vs_kg = FALSE) {

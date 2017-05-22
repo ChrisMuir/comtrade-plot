@@ -1,3 +1,5 @@
+library(shinycssloaders)
+
 # Create vectors of country names and commodities from the data frames downloaded 
 # from the UN Comtrade website (data frames are created in the global.R file).
 reporters <- countrydf[countrydf$type == "reporter", ]$`country name`
@@ -70,7 +72,7 @@ shinyUI(fluidPage(
     
     # Show plot of data returned from the API call.
     mainPanel(
-      plotlyOutput("resPlot", height = "768px")
+      plotlyOutput("resPlot", height = "768px") %>% withSpinner()
     )
   )
 ))
