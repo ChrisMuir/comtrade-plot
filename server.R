@@ -145,7 +145,8 @@ shinyServer(function(input, output) {
                         partners = input$partner, 
                         countrytable = countrydf, 
                         tradedirection = tolower(input$trade_direction), 
-                        commodcodes = codes)
+                        commodcodes = codes, 
+                        ssl_verify_peer = FALSE)
   }, ignoreNULL = FALSE)
   
   user_input <- eventReactive(input$get_plot, {
