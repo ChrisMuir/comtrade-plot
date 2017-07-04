@@ -100,9 +100,17 @@ ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
     y_label <- "total value of shipments in USD"
   }
   
+  plotdf$hover <- NA
+  for (i in seq_len(nrow(plotdf))) {
+    lab <- paste0("Year: ", plotdf$Year[i], "<br>", 
+                  "Value: ", plotdf$value[i], "<br>", 
+                  "Partner: ", plotdf$Partner[i])
+    plotdf$hover[i] <- lab
+  }
+  
   # Generate ggplot object, which will be wrapped in plotly::ggplotly().
   p <- ggplot(plotdf, aes(Year, value, color = factor(Partner))) + 
-    geom_point(size = 2.5) + 
+    geom_point(size = 2.5, aes(text = hover)) + 
     geom_line(size = 1) + 
     scale_x_continuous(limits = c(min(plotdf$Year), max(plotdf$Year)), 
                        breaks = seq.int(min(plotdf$Year), max(plotdf$Year), 2)) + 
@@ -114,19 +122,7 @@ ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
           legend.text = element_text(size = 8), 
           legend.title = element_text(size = 8), 
           title = element_text(size = 12))
-  return(ggplotly(p))
-}
-
-commodity_code_lookup <- function(commod_desc, commoditydf) {
-  # Function for querying the commodity code lookup table.
-  # commod_desc: char vector, commodity description supplied by the user.
-  # commoditydf: dataframe, commodity code lookup table.
-  # Output is the code associated with the input commod_desc.
-  output <- commoditydf[commoditydf$commodity == commod_desc, ]$code
-  if (length(output) == 0) {
-    output <- commod_desc
-  }
-  return(output)
+  return(ggplotly(p, tooltip = "text"))
 }
 
 shinyServer(function(input, output) {
@@ -134,19 +130,20 @@ shinyServer(function(input, output) {
     # Treat input$commod then execute API call (only updates when user clicks 
     # the "Plot" button).
     
-    # Apply commodity_code_lookup to every element of input$commod.
-    codes <- vapply(
-      input$commod, function(x) commodity_code_lookup(x, commoditydf), 
-      character(1), 
-      USE.NAMES = FALSE
+    # Isolate the commodity code from each input commodity.
+    codes <- unname(
+      comtradr::commodity_lookup(input$commod, 
+                                 commoditydf, 
+                                 return_code = TRUE, 
+                                 return_char = TRUE, 
+                                 verbose = FALSE)
     )
     # API call.
     comtradr::ct_search(reporters = input$reporter, 
                         partners = input$partner, 
                         countrytable = countrydf, 
                         tradedirection = tolower(input$trade_direction), 
-                        commodcodes = codes, 
-                        ssl_verify_peer = FALSE)
+                        commodcodes = codes)
   }, ignoreNULL = FALSE)
   
   user_input <- eventReactive(input$get_plot, {
