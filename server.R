@@ -4,7 +4,7 @@ no_data_func <- function(res, val_vs_kg = FALSE) {
   # Function for building an "error message" plot, to be displayed when there 
   # is no data to plot.
   # res: list, returned object from a call to the Comtrade API.
-  # val_vs_kg: char vector, either "value" or "weight".
+  # val_vs_kg: logical.
   # Output is a ggplot object that displays a text error message.
   if (val_vs_kg) {
     msg_text <- paste0("Returned data does not contain variable 'Weight in KG'.\n", 
@@ -50,11 +50,15 @@ get_plot_title <- function(reporters, partners, trade_dir) {
     partners <- paste(partners, collapse = ", ")
   }
   # Get trade direction text and filler text.
-  if (all(!"Exports" %in% trade_dir, !"Re-Exports" %in% trade_dir, !"All" %in% trade_dir)) {
+  if (all(!"Exports" %in% trade_dir, 
+          !"Re-Exports" %in% trade_dir, 
+          !"All" %in% trade_dir)) {
     trade_dir <- paste(trade_dir, collapse = ", ")
     filler_1 <- " into "
     filler_2 <- " from "
-  } else if (all(!"Imports" %in% trade_dir, !"Re-Imports" %in% trade_dir, !"All" %in% trade_dir)) {
+  } else if (all(!"Imports" %in% trade_dir, 
+                 !"Re-Imports" %in% trade_dir, 
+                 !"All" %in% trade_dir)) {
     trade_dir <- paste(trade_dir, collapse = ", ")
     filler_1 <- " from "
     filler_2 <- " into "
@@ -73,7 +77,8 @@ ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
   # reporters: char vector, reporter countries supplied by the user.
   # partners: char vector, partner countries supplied by the user.
   # trade_dir: char vector, all trade directions supplied by the user.
-  # Output is ggplotly object that will be displayed in the main panel of the app.
+  # Output is ggplotly object that will be displayed in the main panel of the 
+  # app.
   
   # Generate the plot title.
   plot_title <- get_plot_title(reporters, partners, trade_dir)

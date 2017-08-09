@@ -1,7 +1,8 @@
 library(shinycssloaders)
 
-# Create vectors of country names and commodities from the data frames downloaded 
-# from the UN Comtrade website (data frames are created in the global.R file).
+# Create vectors of country names and commodities from the data frames 
+# downloaded from the UN Comtrade website (data frames are created in the 
+# global.R file).
 reporters <- countrydf[countrydf$type == "reporter", ]$`country name`
 partners <- countrydf[countrydf$type == "partner", ]$`country name`
 commodities <- commoditydf$commodity
@@ -44,7 +45,11 @@ shinyUI(fluidPage(
       
       checkboxGroupInput("trade_direction", 
                          label = "Trade Direction for Reporting Country:", 
-                         choices = c("Imports" = "Imports", "Exports" = "Exports", "Re-Imports" = "Re-Imports", "Re-Exports" = "Re-Exports", "All" = "All"), 
+                         choices = c("Imports" = "Imports", 
+                                     "Exports" = "Exports", 
+                                     "Re-Imports" = "Re-Imports", 
+                                     "Re-Exports" = "Re-Exports", 
+                                     "All" = "All"), 
                          selected = "Exports"), 
       
       radioButtons("value_vs_kg", 
