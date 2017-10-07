@@ -8,3 +8,5 @@ View the app [here](https://chrismuir.shinyapps.io/comtrade_plot_shinyapp/). Bui
 More info on the UN Comtrade DB can be found [here](https://comtrade.un.org/data/), and full API documentation can be found [here](https://comtrade.un.org/data/doc/api/).
 
 This app is in no way affiliated with the United Nations.
+
+![](./img/comtrade_plot.png?raw=true "Comtrade Plot")
