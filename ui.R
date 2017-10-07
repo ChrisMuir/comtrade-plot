@@ -1,12 +1,21 @@
 library(shinycssloaders)
 
-# Create vectors of country names and commodities from the data frames 
-# downloaded from the UN Comtrade website (data frames are created in the 
-# global.R file).
-reporters <- countrydf[countrydf$type == "reporter", ]$`country name`
-partners <- countrydf[countrydf$type == "partner", ]$`country name`
-commodities <- commoditydf$commodity
+# Get vector of reporter country names.
+reporters <- comtradr:::get_country_db() %>% 
+  filter(reporter) %>% 
+  .[["country_name"]] %>% 
+  .[. != "All"]
 
+# Get vector of partner country names.
+partners <- comtradr:::get_country_db() %>% 
+  filter(partner) %>% 
+  .[["country_name"]] %>% 
+  .[. != "All"]
+
+# Get vector of commodities.
+commodities <- comtradr:::get_commodity_db()$commodity
+
+# Create UI.
 shinyUI(fluidPage(
   
   # Application title.
@@ -21,6 +30,7 @@ shinyUI(fluidPage(
     sidebarPanel(
       HTML("Provide input for Reporting Country, Partner Countries, 
            Commodities, Trade Direction, and y-axis metric."),
+      br(), 
       HTML("Click the 'Plot' button to update the plot."), 
       br(), 
       br(), 

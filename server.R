@@ -1,26 +1,24 @@
 library(ggplot2)
+library(scales)
 
-no_data_func <- function(res, val_vs_kg = FALSE) {
+no_data_func <- function(msg, val_vs_kg = FALSE) {
   # Function for building an "error message" plot, to be displayed when there 
   # is no data to plot.
-  # res: list, returned object from a call to the Comtrade API.
+  # msg: str, either error message on why the API query failed, or message 
+  #   indicating the query was successful but simply returned no data.
   # val_vs_kg: logical.
   # Output is a ggplot object that displays a text error message.
   if (val_vs_kg) {
     msg_text <- paste0("Returned data does not contain variable 'Weight in KG'.\n", 
                        "Please select 'Value in USD'.")
-  } else if (res$msg == "Ok" && is.null(res$details)) {
+  } else if (msg == "no_data") {
     msg_text <- paste0("The API query returned no data.\n\n", 
                        "The API connection was successful, but the search ", 
                        "resulted in no data.\nTry a different search")
-  } else if (res$msg == "Could not complete connection to API") {
-    msg_text <- paste0("The API query returned no data.\n\n", 
-                       "Could not connect to the API.\nEither your internet ", 
-                       "connection is bad, or the API is down.")
   } else {
     msg_text <- paste0("The API query returned no data.\n\n", 
-                       "Here are the return details provided by the API:\n", 
-                       paste(res$msg, res$details, sep = "\n"))
+                       "Error message from the API query:\n", 
+                       msg)
   }
   
   p <- ggplot(data.frame()) + geom_point() + xlim(0, 10) + ylim(0, 100) + 
@@ -70,9 +68,9 @@ get_plot_title <- function(reporters, partners, trade_dir) {
   return(paste0(trade_dir, filler_1, reporters, filler_2, partners))
 }
 
-ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
+ggplot_func <- function(df, val_vs_kg, reporters, partners, trade_dir) {
   # Takes various inputs and creates a ggplotly object.
-  # res: list, returned object from a call to the Comtrade API.
+  # df: data frame, returned object from a call to the Comtrade API.
   # val_vs_kg: char vector, either "value" or "weight".
   # reporters: char vector, reporter countries supplied by the user.
   # partners: char vector, partner countries supplied by the user.
@@ -82,44 +80,52 @@ ggplot_func <- function(res, val_vs_kg, reporters, partners, trade_dir) {
   
   # Generate the plot title.
   plot_title <- get_plot_title(reporters, partners, trade_dir)
-  # Isolate the data from the returned API list.
-  df <- res$data
   
   # Transformations based on which variable is to be mapped to the y-axis, 
   # which will be either "Weight in KG" or "Value in USD" and is determined by 
   # the value of input val_vs_kg.
   if (val_vs_kg == "weight") {
-    if (typeof(df$`Netweight (kg)`) == "integer") {
+    if (typeof(df$`Net Weight kg`) == "integer") {
+      # Create plot data frame.
       plotdf <- df %>% 
-        group_by_(.dots = c("Partner", "Year")) %>% 
-        summarise(value = as.numeric(sum(`Netweight (kg)`, na.rm = TRUE)))
+        group_by_(.dots = c("`Partner Country`", "Year")) %>% 
+        summarise(value = as.numeric(sum(`Net Weight kg`, na.rm = TRUE)))
       y_label <- "total weight of shipments in KG"
+      # Create hover variable.
+      plotdf$hover <- NA
+      for (i in seq_len(nrow(plotdf))) {
+        lab <- paste0("Year: ", plotdf$Year[i], "<br>", 
+                      "Value: ", scales::comma(plotdf$value[i]), "<br>", 
+                      "Partner: ", plotdf$`Partner Country`[i])
+        plotdf$hover[i] <- lab
+      }
     } else {
-      p <- no_data_func(res, val_vs_kg = TRUE)
+      p <- no_data_func("weight", val_vs_kg = TRUE)
       return(ggplotly(p))
     }
   } else if (val_vs_kg == "value") {
+    # Create plot data frame.
     plotdf <- df %>% 
-      group_by_(.dots = c("Partner", "Year")) %>% 
-      summarise(value = as.numeric(sum(`Trade Value (US$)`, na.rm = TRUE)))
+      group_by_(.dots = c("`Partner Country`", "Year")) %>% 
+      summarise(value = as.numeric(sum(`Trade Value usd`, na.rm = TRUE)))
     y_label <- "total value of shipments in USD"
-  }
-  
-  plotdf$hover <- NA
-  for (i in seq_len(nrow(plotdf))) {
-    lab <- paste0("Year: ", plotdf$Year[i], "<br>", 
-                  "Value: ", plotdf$value[i], "<br>", 
-                  "Partner: ", plotdf$Partner[i])
-    plotdf$hover[i] <- lab
+    # Create hover variable.
+    plotdf$hover <- NA
+    for (i in seq_len(nrow(plotdf))) {
+      lab <- paste0("Year: ", plotdf$Year[i], "<br>", 
+                    "Value: ", scales::dollar(plotdf$value[i]), "<br>", 
+                    "Partner: ", plotdf$`Partner Country`[i])
+      plotdf$hover[i] <- lab
+    }
   }
   
   # Generate ggplot object, which will be wrapped in plotly::ggplotly().
-  p <- ggplot(plotdf, aes(Year, value, color = factor(Partner))) + 
+  p <- ggplot(plotdf, aes(Year, value, color = factor(`Partner Country`))) + 
     geom_point(size = 2.5, aes(text = hover)) + 
     geom_line(size = 1) + 
     scale_x_continuous(limits = c(min(plotdf$Year), max(plotdf$Year)), 
                        breaks = seq.int(min(plotdf$Year), max(plotdf$Year), 2)) + 
-    labs(title = plot_title, x = "year", y = y_label, 
+    labs(title = plot_title, y = y_label, 
          color = "Partner\nCountries", linetype = "Partner\nCountries") +
     theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust = 1), 
           axis.title = element_text(size = 10), 
@@ -136,24 +142,20 @@ shinyServer(function(input, output) {
     # the "Plot" button).
     
     # Isolate the commodity code from each input commodity.
-    codes <- unname(
-      comtradr::commodity_lookup(input$commod, 
-                                 commoditydf, 
-                                 return_code = TRUE, 
-                                 return_char = TRUE, 
-                                 verbose = FALSE)
-    )
+    codes <- comtradr::ct_commodity_lookup(input$commod, 
+                                           return_code = TRUE, 
+                                           return_char = TRUE, 
+                                           verbose = FALSE)
     # API call.
     comtradr::ct_search(reporters = input$reporter, 
                         partners = input$partner, 
-                        countrytable = countrydf, 
-                        tradedirection = tolower(input$trade_direction), 
-                        commodcodes = codes)
+                        trade_direction = tolower(input$trade_direction), 
+                        commod_codes = codes)
   }, ignoreNULL = FALSE)
   
   user_input <- eventReactive(input$get_plot, {
-    # Record the inputs supplied by the user (only updates when user clicks the 
-    # "Plot" button).
+    # Record the inputs supplied by the user (only updates when user clicks 
+    # the "Plot" button).
     list(
       reporters = input$reporter, 
       partners = input$partner, 
@@ -163,14 +165,17 @@ shinyServer(function(input, output) {
   
   output$resPlot <- renderPlotly({
     # Plot the output.
-    res <- ship_data()
+    res <- tryCatch(ship_data(), error = function(e) e)
     input_vals <- user_input()
     
-    if (!is.null(res$data) && nrow(res$data) > 0) {
+    if (methods::is(res, "error")) {
+      no_data_func(res$message)
+    } else if (nrow(res) == 0) {
+      no_data_func("no_data")
+    } else {
+      res <- comtradr::ct_use_pretty_cols(res)
       p <- ggplot_func(res, input$value_vs_kg, input_vals$reporters, 
                        input_vals$partners, input_vals$trade_dir)
-    } else {
-      no_data_func(res)
     }
   })
   
