@@ -147,10 +147,10 @@ shinyServer(function(input, output) {
                                            return_char = TRUE, 
                                            verbose = FALSE)
     # API call.
-    comtradr::ct_search(reporters = input$reporter, 
-                        partners = input$partner, 
-                        trade_direction = tolower(input$trade_direction), 
-                        commod_codes = codes)
+    m_ct_search(reporters = input$reporter, 
+                partners = input$partner, 
+                trade_direction = tolower(input$trade_direction), 
+                commod_codes = codes)
   }, ignoreNULL = FALSE)
   
   user_input <- eventReactive(input$get_plot, {

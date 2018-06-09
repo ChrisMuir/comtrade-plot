@@ -2,6 +2,6 @@ library(shiny)
 library(plotly)
 library(dplyr)
 
-library(devtools)
-devtools::install_github("ropensci/comtradr")
 library(comtradr)
+library(memoise)
+m_ct_search <- memoise::memoise(ct_search)
